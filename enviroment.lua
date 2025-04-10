@@ -12,5 +12,5 @@ end
 
 function NPCSurvivor:setBarricade(location)
     -- Implement barricade-setting logic
-    print(self.name .. " sets up a barricade at " .. tostring(location.x) .. ", " .. tostring(location.y))
+    print(self.name .. " sets up a barricade at (" .. location.x .. ", " .. location.y .. ").")
 end
