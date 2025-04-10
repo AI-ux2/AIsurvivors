@@ -23,6 +23,3 @@ function BehaviorNode:new(executeFunction)
     setmetatable(node, self)
     return node
 end
-
--- Define NPC behavior methods outside of NPCSurvivor here
--- Implement function definitions for detecting zombies, fighting, etc.
