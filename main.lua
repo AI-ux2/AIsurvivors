@@ -13,15 +13,36 @@ require 'group_behaviors'
 require 'stealth'
 require 'health'
 
-function spawnNPCs()
-    globalNPCList = {} -- Global table to track NPCs
-    local numNPCs = 0
-    while numNPCs < MAX_NPCS do
-        local safeZone = SAFE_ZONES[math.random(1, #SAFE_ZONES)]
-        local randomX = safeZone.x
+local MAX_NPCS = 10 -- Move configurable values to constants
+local SPAWN_RADIUS = 50
 
-function Inventory:listItems()
-    for name, item in pairs(self.items) do
-        print(item.quantity .. " x " .. name .. " (" .. item.type .. ")")
+function spawnNPCs()
+    globalNPCList = {} -- Ensure the NPC list is initialized globally
+    for i = 1, MAX_NPCS do
+        local safeZone = SAFE_ZONES[math.random(1, #SAFE_ZONES)]
+        local randomX = safeZone.x + math.random(-SPAWN_RADIUS, SPAWN_RADIUS)
+        local randomY = safeZone.y + math.random(-SPAWN_RADIUS, SPAWN_RADIUS)
+
+        local personalityType = math.random(1, #NPC_PERSONALITIES)
+        local survivor = NPCSurvivor:new("Survivor" .. i, randomX, randomY, personalityType)
+        table.insert(globalNPCList, survivor)
+
+        if i == 1 then
+            survivor.isLeader = true
+        end
     end
 end
+
+function onGameStart()
+    spawnNPCs()
+
+    Events.OnTick.Add(function()
+        for _, npc in ipairs(globalNPCList) do
+            if npc and npc.behaviorTree then
+                npc.behaviorTree:run(npc)
+            end
+        end
+    end)
+end
+
+Events.OnGameStart.Add(onGameStart)
