@@ -1,56 +1,51 @@
--- inventory.lua
+BehaviorTree = {}
+BehaviorTree.__index = BehaviorTree
 
-Item = {}
-Item.__index = Item
-
-function Item:new(name, type, quantity)
-    return setmetatable({ name = name, type = type, quantity = quantity }, self)
+function BehaviorTree:new(root)
+    return setmetatable({ root = root }, self)
 end
 
-Inventory = {}
-Inventory.__index = Inventory
-
-function Inventory:new()
-    return setmetatable({ items = {} }, self)
-end
-
-function Inventory:addItem(item)
-    if self.items[item.name] then
-        self.items[item.name].quantity = self.items[item.name].quantity + item.quantity
-    else
-        self.items[item.name] = item
+function BehaviorTree:run(npc)
+    if self.root then
+        self.root:execute(npc)
     end
-    print(item.quantity .. " " .. item.name .. " added to inventory.")
 end
 
-function Inventory:removeItem(itemName, quantity)
-    if self.items[itemName] then
-        if self.items[itemName].quantity >= quantity then
-            self.items[itemName].quantity = self.items[itemName].quantity - quantity
-            if self.items[itemName].quantity == 0 then
-                self.items[itemName] = nil
-            end
-            print(quantity .. " " .. itemName .. " removed from inventory.")
-        else
-            print("Not enough " .. itemName .. " to remove.")
+BehaviorNode = {}
+BehaviorNode.__index = BehaviorNode
+
+function BehaviorNode:new(executeFunction)
+    return setmetatable({ execute = executeFunction }, self)
+end
+
+SequenceNode = {}
+SequenceNode.__index = SequenceNode
+
+function SequenceNode:new(children)
+    return setmetatable({ children = children }, self)
+end
+
+function SequenceNode:execute(npc)
+    for _, child in ipairs(self.children) do
+        if child:execute(npc) == "failed" then
+            return "failed"
         end
-    else
-        print(itemName .. " does not exist in inventory.")
     end
+    return "completed"
 end
 
-function Inventory:tradeItem(otherInventory, itemName, quantity)
-    if self.items[itemName] and self.items[itemName].quantity >= quantity then
-        otherInventory:addItem(Item:new(itemName, self.items[itemName].type, quantity))
-        self:removeItem(itemName, quantity)
-    else
-        print("Not enough items to trade.")
-    end
+FallbackNode = {}
+FallbackNode.__index = FallbackNode
+
+function FallbackNode:new(children)
+    return setmetatable({ children = children }, self)
 end
 
-function Inventory:listItems()
-    for name, item in pairs(self.items) do
-        print(item.quantity .. " x " .. name .. " (" .. item.type .. ")")
+function FallbackNode:execute(npc)
+    for _, child in ipairs(self.children) do
+        if child:execute(npc) == "completed" then
+            return "completed"
+        end
     end
+    return "failed"
 end
-
