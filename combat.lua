@@ -1,20 +1,55 @@
--- combat.lua
+-- inventory.lua
 
-function NPCSurvivor:fight(zombie)
-    -- Simulate weapon use with critical hit chance
-    local damageToZombie = 20
-    if math.random() < self.criticalHitChance then
-        damageToZombie = damageToZombie * 2 -- Critical hit doubles damage
-        print(self.name .. " scored a critical hit!")
+Item = {}
+Item.__index = Item
+
+function Item:new(name, type, quantity)
+    return setmetatable({ name = name, type = type, quantity = quantity }, self)
+end
+
+Inventory = {}
+Inventory.__index = Inventory
+
+function Inventory:new()
+    return setmetatable({ items = {} }, self)
+end
+
+function Inventory:addItem(item)
+    if self.items[item.name] then
+        self.items[item.name].quantity = self.items[item.name].quantity + item.quantity
+    else
+        self.items[item.name] = item
     end
-    
-    local damageToNPC = 10
-    self.health = self.health - damageToNPC
+    print(item.quantity .. " " .. item.name .. " added to inventory.")
+end
 
-    print(self.name .. " attacks a zombie! Zombie takes " .. damageToZombie .. " damage.")
-    print(self.name .. " takes " .. damageToNPC .. " damage, health is now: " .. self.health)
+function Inventory:removeItem(itemName, quantity)
+    if self.items[itemName] then
+        if self.items[itemName].quantity >= quantity then
+            self.items[itemName].quantity = self.items[itemName].quantity - quantity
+            if self.items[itemName].quantity == 0 then
+                self.items[itemName] = nil
+            end
+            print(quantity .. " " .. itemName .. " removed from inventory.")
+        else
+            print("Not enough " .. itemName .. " to remove.")
+        end
+    else
+        print(itemName .. " does not exist in inventory.")
+    end
+end
 
-    if self.health <= 0 then
-        print(self.name .. " has been killed!")
+function Inventory:tradeItem(otherInventory, itemName, quantity)
+    if self.items[itemName] and self.items[itemName].quantity >= quantity then
+        otherInventory:addItem(Item:new(itemName, self.items[itemName].type, quantity))
+        self:removeItem(itemName, quantity)
+    else
+        print("Not enough items to trade.")
+    end
+end
+
+function Inventory:listItems()
+    for name, item in pairs(self.items) do
+        print(item.quantity .. " x " .. name .. " (" .. item.type .. ")")
     end
 end
