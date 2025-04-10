@@ -1,12 +1,19 @@
 -- main.lua
 
--- Load other modules
 require 'npc'
 require 'behaviors'
 require 'pathfinding'
 require 'combat'
 require 'environment'
 require 'settings'
+require 'events'
+require 'relationships'
+require 'inventory'
+require 'quests'
+require 'factions'
+require 'group_behaviors'
+require 'stealth'
+require 'health'
 
 -- Function to spawn a new NPC at random safe locations
 function spawnNPCs()
@@ -16,10 +23,10 @@ function spawnNPCs()
         local randomX = safeZone.x + math.random(-SPAWN_RADIUS, SPAWN_RADIUS)
         local randomY = safeZone.y + math.random(-SPAWN_RADIUS, SPAWN_RADIUS)
 
-        local survivor = NPCSurvivor:new("Survivor" .. numNPCs + 1, randomX, randomY)
+        local personalityType = math.random(1, #NPC_PERSONALITIES) -- Random personality
+        local survivor = NPCSurvivor:new("Survivor" .. numNPCs + 1, randomX, randomY, personalityType)
         print(survivor.name .. " spawned at (" .. survivor.position.x .. ", " .. survivor.position.y .. ")")
 
-        -- For this implementation, assign a random leader to the first NPC
         if numNPCs == 1 then
             survivor.leader = survivor -- The first NPC becomes a leader
         end
