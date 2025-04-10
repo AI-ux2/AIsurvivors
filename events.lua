@@ -1,5 +1,3 @@
--- events.lua
-
 Events = {}
 Events.triggers = {}
 
