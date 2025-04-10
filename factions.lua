@@ -1,5 +1,3 @@
--- factions.lua
-
 Faction = {}
 Faction.__index = Faction
 
@@ -9,7 +7,7 @@ end
 
 function Faction:addMember(npc)
     table.insert(self.members, npc)
-    npc.faction = self.name
+    npc.faction = self
 end
 
 function Faction:removeMember(npc)
@@ -21,3 +19,4 @@ function Faction:removeMember(npc)
         end
     end
 end
+
